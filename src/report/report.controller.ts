@@ -5,27 +5,39 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
+  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { ReportType } from 'src/data';
 import { data } from 'src/data';
+import {
+  CreateReportDto,
+  ReportResponseDto,
+  UpdateReportDto,
+} from './dtos/report.dto';
 @Controller('report/:type')
 export class ReportController {
   @Get()
-  getReport(@Param('type') type: ReportType) {
+  getAllReports(
+    @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
+  ): ReportResponseDto {
     return data.report.filter((report) => report.type === type);
   }
   @Get(':id')
-  getReportById(@Param('type') type: ReportType, @Param('id') id: string) {
+  getReportById(
+    @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return data.report
       .filter((report) => report.type === type)
       .find((report) => report.id === id);
   }
   @Post()
   createReport(
-    @Body() { amount, source }: { amount: number; source: string },
-    @Param('type') type: ReportType,
+    @Body() { amount, source }: CreateReportDto,
+    @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
   ) {
     const newReport = {
       id: uuid(),
@@ -40,9 +52,9 @@ export class ReportController {
   }
   @Put(':id')
   updateReport(
-    @Body() { amount, source }: { amount: number; source: string },
-    @Param('type') type: ReportType,
-    @Param('id') id: string,
+    @Body() body: UpdateReportDto,
+    @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
+    @Param('id', ParseUUIDPipe) id: string,
   ) {
     const reportToUpdate = data.report
       .filter((report) => report.type === type)
@@ -53,14 +65,13 @@ export class ReportController {
     );
     data.report[reportIndex] = {
       ...data.report[reportIndex],
-      amount,
-      source,
+      ...body,
       updated_at: new Date(),
     };
     return data.report[reportIndex];
   }
   @Delete(':id')
-  deleteReport(@Param('id') id: string) {
+  deleteReport(@Param('id', ParseUUIDPipe) id: string) {
     const reportIndex = data.report.findIndex((report) => report.id === id);
     if (reportIndex === -1) return 'report not found';
     data.report.splice(reportIndex, 1);
