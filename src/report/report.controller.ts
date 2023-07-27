@@ -17,13 +17,17 @@ import {
   ReportResponseDto,
   UpdateReportDto,
 } from './dtos/report.dto';
+import { ReportService } from './report.service';
 @Controller('report/:type')
 export class ReportController {
+  constructor(private readonly reportService: ReportService) {}
   @Get()
   getAllReports(
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
   ): ReportResponseDto {
-    return data.report.filter((report) => report.type === type);
+    // const reportType =
+    // type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    return this.reportService.getAllReports(type);
   }
   @Get(':id')
   getReportById(
