@@ -21,39 +21,33 @@ import { ReportService } from './report.service';
 @Controller('report/:type')
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
+
   @Get()
   getAllReports(
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
-  ): ReportResponseDto {
-    // const reportType =
-    // type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
-    // @ts-ignore
-    return this.reportService.getAllReports(type);
+  ): ReportResponseDto[] {
+    const reportType =
+      type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    return this.reportService.getAllReports(reportType);
   }
+
   @Get(':id')
   getReportById(
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return data.report
-      .filter((report) => report.type === type)
-      .find((report) => report.id === id);
+    const reportType =
+      type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    return this.reportService.getReportById(reportType, id);
   }
   @Post()
   createReport(
-    @Body() { amount, source }: CreateReportDto,
+    @Body() body: CreateReportDto,
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
   ) {
-    const newReport = {
-      id: uuid(),
-      source,
-      amount,
-      created_at: new Date(),
-      updated_at: new Date(),
-      type,
-    };
-    data.report.push(newReport);
-    return newReport;
+    const reportType =
+      type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    return this.reportService.createReport(reportType, body);
   }
   @Put(':id')
   updateReport(
@@ -61,25 +55,12 @@ export class ReportController {
     @Param('type', new ParseEnumPipe(ReportType)) type: ReportType,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    const reportToUpdate = data.report
-      .filter((report) => report.type === type)
-      .find((report) => report.id === id);
-    if (!reportToUpdate) return 'no report found';
-    const reportIndex = data.report.findIndex(
-      (report) => report.id === reportToUpdate.id,
-    );
-    data.report[reportIndex] = {
-      ...data.report[reportIndex],
-      ...body,
-      updated_at: new Date(),
-    };
-    return data.report[reportIndex];
+    const reportType =
+      type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    return this.reportService.updateReport(reportType, body, id);
   }
   @Delete(':id')
   deleteReport(@Param('id', ParseUUIDPipe) id: string) {
-    const reportIndex = data.report.findIndex((report) => report.id === id);
-    if (reportIndex === -1) return 'report not found';
-    data.report.splice(reportIndex, 1);
-    return 'report deleted';
+    return this.reportService.deleteReport(id);
   }
 }
