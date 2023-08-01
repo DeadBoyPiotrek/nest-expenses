@@ -39,7 +39,7 @@ export class ReportService {
       type,
     };
     data.report.push(newReport);
-    return newReport;
+    return new ReportResponseDto(newReport);
   }
 
   updateReport(type: ReportType, body: UpdateReport, id: string) {
@@ -55,7 +55,7 @@ export class ReportService {
       ...body,
       updated_at: new Date(),
     };
-    return data.report[reportIndex];
+    return new ReportResponseDto(data.report[reportIndex]);
   }
 
   deleteReport(id) {
